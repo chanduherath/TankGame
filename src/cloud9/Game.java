@@ -100,7 +100,7 @@ public class Game extends javax.swing.JFrame {
 
     private void viewTankDetails() {//shows the details of each and every tank in the tank array
         for (int i = 0; i < numOfPlayers; i++) {
-            System.out.println("tank No " + i);
+            System.out.println("Tank No " + i);
             System.out.print(tankarray[i].getTanklocationX() + " ");
             System.out.print(tankarray[i].getTanklocationY() + " ");
             System.out.print(tankarray[i].getDirection() + " ");

@@ -60,11 +60,11 @@ public class Parser {
         for (int j = 0; j < arr.length; j++) {
             arr[j] = strarray.nextToken();
         }
-        System.out.println("Life pack appered...");
+        System.out.println("Life pack appeared...");
         lf.setXcod(Integer.parseInt(arr[1]));
-        System.out.println("x cordinate " + arr[1]);
+        System.out.println("X Co-ordinate :" + arr[1]);
         lf.setYcod(Integer.parseInt(arr[2]));
-        System.out.println("y cordinate " + arr[2]);
+        System.out.println("Y Co-ordinate :" + arr[2]);
         lf.setVal(Integer.parseInt(arr[3]));
         System.out.println("value " + arr[3]);
         return lf;
@@ -80,13 +80,13 @@ public class Parser {
         }
         System.out.println("Coin appeared");
         coin1.setXcod(Integer.parseInt(arr[1]));
-        System.out.println("x cordinate :" + coin1.getXcod());
+        System.out.println("X Co-ordinate :" + coin1.getXcod());
         coin1.setYcod(Integer.parseInt(arr[2]));
-        System.out.println("y cordinate :" + coin1.getYcod());
+        System.out.println("Y Co-ordinate :" + coin1.getYcod());
         coin1.setTime(Integer.parseInt(arr[3]));
-        System.out.println("remaining time :" + coin1.getTime());
+        System.out.println("Remaining time :" + coin1.getTime());
         coin1.setVal(Integer.parseInt(arr[4]));
-        System.out.println("coin value : " + coin1.getVal());
+        System.out.println("Coin value : " + coin1.getVal());
         
         return coin1;
     }
