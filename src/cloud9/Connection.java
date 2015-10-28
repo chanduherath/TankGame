@@ -36,7 +36,7 @@ public class Connection {
             in = new BufferedReader(new InputStreamReader(listner.getInputStream()));
             String reply = in.readLine();
             mapdetais = reply;
-            System.out.println(reply);
+            System.out.println("First reply : " + reply);
             listner.close();
 
             // recieve second time
@@ -44,7 +44,7 @@ public class Connection {
             in = new BufferedReader(new InputStreamReader(listner.getInputStream()));
             String secondreply = in.readLine();
             positiondetails = secondreply;
-            System.out.println(secondreply);
+            System.out.println("second reply : " + secondreply);
             listner.close();
         } catch (IOException ex) {
             System.out.println(ex);

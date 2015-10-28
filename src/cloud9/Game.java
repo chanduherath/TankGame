@@ -32,8 +32,11 @@ public class Game extends javax.swing.JFrame {
     JLabel[][] lablearray = null;
     ArrayList<String[]> detaillist;
     int numOfPlayers = 0;
+    Tank[] tankarray = new Tank[5];
+    ArrayList<LifePack>  lifepacksarr;
 
     public Game() {
+        detaillist = new ArrayList<String[]>();
         initComponents();
     }
 
@@ -44,13 +47,16 @@ public class Game extends javax.swing.JFrame {
         this.server = Connection.server;
         this.map = map;
         parser1 = new Parser();
+        detaillist = new ArrayList<String[]>();
+        lifepacksarr = new ArrayList<LifePack>();
+        initializeTankArray();
         initComponents();
         StartListen();
         createLableArray();
         drawMap(map);
     }
 
-    public void StartListen() {
+    public void StartListen() {//this method listern for the strings send by the server
         new Thread() {
             public void run() {
                 while (true) {
@@ -58,11 +64,18 @@ public class Game extends javax.swing.JFrame {
                         listn = server.accept();
                         in = new BufferedReader(new InputStreamReader(listn.getInputStream()));
                         String receivedString = in.readLine();
+                        System.out.println(receivedString);
                         if (receivedString.startsWith("G:")) {
                             detaillist = parser1.GameBroadcast(receivedString);
-                            numOfPlayers = parser1.finfNumOfPlayers(receivedString);
+                            numOfPlayers = detaillist.size();
+                            upDateTankDetails(detaillist);
+//                            viewTankDetails();
+                        }if(receivedString.startsWith("L:")){
+                            parser1.createLifePack(receivedString);
+                        }if(receivedString.startsWith("C:")){
+                            parser1.createCoin(receivedString);
                         }
-                        System.out.println(receivedString);
+
                         listn.close();
                     } catch (IOException ex) {
                         Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
@@ -72,7 +85,7 @@ public class Game extends javax.swing.JFrame {
         }.start();
     }
 
-    public void SendData(String command) {
+    public void SendData(String command) {//This method is used to send commands as a string to the server
         try {
             Connection.socket = new Socket("127.0.0.1", 6000);
             Connection.out = new DataOutputStream(socket.getOutputStream());
@@ -85,11 +98,37 @@ public class Game extends javax.swing.JFrame {
 
     }
 
-    private void upDatePlayerDetails(ArrayList<String> detaillist) {
-        
+    private void viewTankDetails() {//shows the details of each and every tank in the tank array
+        for (int i = 0; i < numOfPlayers; i++) {
+            System.out.println("tank No " + i);
+            System.out.print(tankarray[i].getTanklocationX() + " ");
+            System.out.print(tankarray[i].getTanklocationY() + " ");
+            System.out.print(tankarray[i].getDirection() + " ");
+            System.out.print(tankarray[i].getWhethershot() + " ");
+            System.out.print(tankarray[i].getHealth() + " ");
+            System.out.print(tankarray[i].getCoins() + " ");
+            System.out.print(tankarray[i].getPoints() + " ");
+            System.out.println(tankarray[i].isState() + " ");
+
+        }
     }
 
-    private void createLableArray() {
+    private void upDateTankDetails(ArrayList<String[]> detaillist) {//the details of the tanks are updated using this method
+        for (int i = 0; i < detaillist.size(); i++) {
+            for (int j = 0; j < detaillist.get(i).length; j++) {
+                tankarray[i].setTanklocationX(Integer.parseInt(detaillist.get(i)[0]));
+                tankarray[i].setTanklocationY(Integer.parseInt(detaillist.get(i)[1]));
+                tankarray[i].setDirection(Integer.parseInt(detaillist.get(i)[2]));
+                tankarray[i].setWhethershot(Integer.parseInt(detaillist.get(i)[3]));
+                tankarray[i].setHealth(Integer.parseInt(detaillist.get(i)[4]));
+                tankarray[i].setCoins(Integer.parseInt(detaillist.get(i)[5]));
+                tankarray[i].setPoints(Integer.parseInt(detaillist.get(i)[6]));
+                tankarray[i].setState(true);
+            }
+        }
+    }
+
+    private void createLableArray() {//an array of size 100 representing the game map
         lablearray = new JLabel[][]{{jLabel1, jLabel2, jLabel3, jLabel4, jLabel5, jLabel6, jLabel7, jLabel8, jLabel9, jLabel10},
         {jLabel11, jLabel12, jLabel13, jLabel14, jLabel15, jLabel16, jLabel17, jLabel18, jLabel19, jLabel20},
         {jLabel21, jLabel22, jLabel23, jLabel24, jLabel25, jLabel26, jLabel27, jLabel28, jLabel29, jLabel30},
@@ -103,7 +142,15 @@ public class Game extends javax.swing.JFrame {
 
     }
 
-    private void drawMap(String[][] map) {
+    private void initializeTankArray() {//create an array which includes five tanks
+        tankarray[0] = new Tank();
+        tankarray[1] = new Tank();
+        tankarray[2] = new Tank();
+        tankarray[3] = new Tank();
+        tankarray[4] = new Tank();
+    }
+
+    private void drawMap(String[][] map) {//draws the map considering the stones water and bricks
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
                 if (map[i][j].equals("S")) {
@@ -234,6 +281,9 @@ public class Game extends javax.swing.JFrame {
         addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 formKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                formKeyReleased(evt);
             }
         });
 
@@ -881,45 +931,48 @@ public class Game extends javax.swing.JFrame {
                     .addComponent(jLabel100, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)))
         );
 
-        jLabel2.getAccessibleContext().setAccessibleName("");
-        jLabel1.getAccessibleContext().setAccessibleName("");
-        jLabel3.getAccessibleContext().setAccessibleName("");
-        jLabel4.getAccessibleContext().setAccessibleName("");
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(30, 30, 30)
+                .addGap(29, 29, 29)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(158, Short.MAX_VALUE))
+                .addContainerGap(54, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(19, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(26, 26, 26)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(42, 42, 42))
+                .addContainerGap(29, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void formKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyPressed
-        if (evt.getKeyCode() == 39) {
+        if (evt.getKeyCode() == 39) {//right arrow key
             SendData("RIGHT#");
         }
-        if (evt.getKeyCode() == 37) {
+        if (evt.getKeyCode() == 37) {//left arrow key
             SendData("LEFT#");
         }
-        if (evt.getKeyCode() == 38) {
+        if (evt.getKeyCode() == 38) {//up arrow key
             SendData("UP#");
         }
-        if (evt.getKeyCode() == 40) {
+        if (evt.getKeyCode() == 40) {//down arrow key
             SendData("DOWN#");
         }
+        if (evt.getKeyCode() == 32) {//space bar for shooting
+            SendData("SHOOT#");
+        }
+
     }//GEN-LAST:event_formKeyPressed
+
+    private void formKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyReleased
+        
+    }//GEN-LAST:event_formKeyReleased
 
     /**
      * @param args the command line arguments
